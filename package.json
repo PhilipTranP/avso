@@ -6,9 +6,9 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "express": "3.4.8",
+    "express": "^4.14.0",
     "jade": "*",
-    "twit": "~1.1.12",
-    "Sentimental": "0.0.4"
+    "twit": "*",
+    "Sentimental": "*"
   }
 }
