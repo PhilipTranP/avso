@@ -1,85 +1,35 @@
-var PORT = process.env.PORT || 3000;
-var moment = require('moment');
-var express = require('express');
+var express = require('express'),
+  routes = require('./routes'),
+  http = require('http'),
+  path = require('path'),
+  fs = require('fs');
+
+// create express app  
 var app = express();
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
 
-app.use(express.static(__dirname + '/public'));
+// all environments
+app.set('port', process.env.PORT || 3000);
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'jade');
+app.use(express.favicon());
+app.use(express.logger('dev'));
+app.use(express.json());
+app.use(express.urlencoded());
+app.use(express.methodOverride());
+app.use(app.router);
+app.use(express.static(path.join(__dirname, 'public')));
 
-var clientInfo = {};
-
-// Sends current users to provided socket
-function sendCurrentUsers (socket) {
-	var info = clientInfo[socket.id];
-	var users = [];
-
-	if (typeof info === 'undefined') {
-		return;
-	}
-
-	Object.keys(clientInfo).forEach(function (socketId) {
-		var userInfo = clientInfo[socketId];
-
-		if (info.room === userInfo.room) {
-			users.push(userInfo.name);
-		}
-	});
-
-	socket.emit('message', {
-		name: 'System',
-		text: 'Current users: ' + users.join(', '),
-		timestamp: moment().valueOf()
-	});
+// development only
+if ('development' == app.get('env')) {
+  app.use(express.errorHandler());
 }
 
-io.on('connection', function (socket) {
-	console.log('User connected via socket.io!');
+// routes
+app.get('/', routes.index);
+app.get('/ping', routes.ping);
+app.post('/search', routes.search)
 
-	socket.on('disconnect', function () {
-		var userData = clientInfo[socket.id];
-
-		if (typeof userData !== 'undefined') {
-			socket.leave(userData.room);
-			io.to(userData.room).emit('message', {
-				name: 'System',
-				text: userData.name + ' has left!',
-				timestamp: moment().valueOf()
-			});
-			delete clientInfo[socket.id];
-		}
-	});
-
-	socket.on('joinRoom', function (req) {
-		clientInfo[socket.id] = req;
-		socket.join(req.room);
-		socket.broadcast.to(req.room).emit('message', {
-			name: 'System',
-			text: req.name + ' has joined!',
-			timestamp: moment().valueOf()
-		});
-	});
-
-	socket.on('message', function (message) {
-		console.log('Message received: ' + message.text);
-
-		if (message.text === '@currentUsers') {
-			sendCurrentUsers(socket);
-		} else {
-			message.timestamp = moment().valueOf();
-			io.to(clientInfo[socket.id].room).emit('message', message);	
-		}
-	});
-
-	// timestamp property - JavaScript timestamp (milliseconds)
-
-	socket.emit('message', {
-		name: 'System',
-		text: 'Welcome to the chat application!',
-		timestamp: moment().valueOf()
-	});
-});
-
-http.listen(PORT, function () {
-	console.log('Server started!');
+// create server
+http.createServer(app).listen(app.get('port'), function(){
+  console.log('Express server listening on port ' + app.get('port'));
 });

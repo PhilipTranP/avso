@@ -1,1 +1,10 @@
-node_modules/
+/log/*.log
+/tmp
+.DS_Store
+.idea/
+.sass-cache
+*~
+node_modules
+*.out
+config.js
+intro.md

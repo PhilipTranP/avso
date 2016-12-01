@@ -1,16 +1,14 @@
 {
-  "name": "sockets",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "AppleVersusOrange",
+  "version": "0.0.1",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js"
   },
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "express": "^4.13.3",
-    "moment": "^2.10.6",
-    "socket.io": "^1.3.7"
+    "express": "3.4.8",
+    "jade": "*",
+    "twit": "~1.1.12",
+    "Sentimental": "0.0.4"
   }
 }
